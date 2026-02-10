@@ -1,136 +1,191 @@
-# Simple Storage — Foundry Fundamentals Project
+# Fund Me Frontend — Web3 Learning Project
 
-A minimal smart contract built with Foundry to demonstrate fundamental blockchain development concepts.  
-This project stores and retrieves a single number on-chain, serving as a foundation for understanding contract deployment, state management, and interaction workflows.
+A minimal frontend interface for interacting with the Fund Me smart contract using browser-based Web3 technologies.  
+This project demonstrates the complete flow from wallet connection to contract interaction, serving as a practical introduction to dApp development.
 
 ---
 
 ## About
 
-This project implements a simple storage mechanism where:
-- Users can store a favorite number
-- Users can retrieve their stored number
-- Multiple people can be tracked with their favorite numbers
-- Contract demonstrates basic Solidity state variables and functions
+This is a learning project built as part of the [Cyfrin Updraft](https://updraft.cyfrin.io/) Foundry Fundamentals course.
 
-The contract is designed to be **simple and educational**, making it perfect for learning Foundry toolchain basics and smart contract fundamentals.
+**Key Learning Concepts:**
+- Frontend ≠ trust layer (users must verify contracts themselves)
+- Wallet → Provider → Signer → Contract interaction flow
+- Understanding calldata & function selectors
+- How users can be exploited even without contract bugs
 
----
-
-## Features
-
-- Store and retrieve unsigned integers on-chain
-- Track multiple people with their favorite numbers
-- Clean, minimal codebase for learning
-- Foundry-based testing and deployment
-- Compatible with local and testnet environments
+The interface allows users to:
+- Connect their MetaMask wallet
+- Fund the smart contract with ETH
+- Withdraw funds (owner only)
+- Check contract balance
 
 ---
 
 ## Tech Stack
 
-- **Solidity** `^0.8.18`
-- **Foundry** (Forge, Cast, Anvil)
-- **Anvil** for local blockchain testing
-- **Sepolia Testnet** for live deployment
+- **HTML** - Structure
+- **JavaScript** - Logic
+- **ethers.js** - Blockchain interaction library
+- **MetaMask** - Wallet provider
 
 ---
 
 ## Requirements
 
-- [Foundry](https://book.getfoundry.sh/)
-- Git
+- [Git](https://git-scm.com/)
+- [MetaMask](https://metamask.io/) browser extension
+- A local blockchain (Anvil) or zkSync node running
+- Deployed Fund Me contract
 
-Install Foundry:
+**Verify Git installation:**
 ```bash
-curl -L https://foundry.paradigm.xyz | bash
-foundryup
+git --version
 ```
 
 ---
 
 ## Quick Start
 
-Clone the repository:
+### 1. Clone the Repository
+
 ```bash
-git clone git@github.com:gandalf-blockchain/foundry-simple-storage.git
-cd foundry-simple-storage
+git clone git@github.com:gandalf-blockchain/html-fund-me.git
+cd html-fund-me
 ```
 
-Build contracts:
-```bash
-forge build
-```
+### 2. Run the Frontend
 
-Run tests:
-```bash
-forge test
-```
+**Option A: Double-click** `index.html` to open in browser
+
+**Option B: Use Live Server** (Recommended)
+- Install [Live Server](https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer) VSCode extension
+- Right-click `index.html` → "Open with Live Server"
+
+You should see a page with a "Connect" button.
 
 ---
 
-## Deployment
+## Setup Backend (Smart Contract)
 
-### Deploy Locally (Anvil)
+Before you can interact with the frontend, you need a deployed Fund Me contract.
 
-Start local blockchain:
+### Option 1: Local Blockchain (Foundry + Anvil)
+
+**Terminal 1** — Start local blockchain:
 ```bash
+git clone https://github.com/gandalf-blockchain/foundry-fund-me.git
+cd foundry-fund-me
+forge build
 anvil
 ```
 
-Deploy contract (in new terminal):
+**Terminal 2** — Deploy contract:
 ```bash
-forge script script/DeploySimpleStorage.s.sol --rpc-url http://localhost:8545 --private-key <ANVIL_PRIVATE_KEY> --broadcast
+make deploy
 ```
 
-### Deploy to Testnet (Sepolia)
+Copy the deployed contract address from the output.
 
-Create `.env` file:
-```
-SEPOLIA_RPC_URL=your_rpc_url
-PRIVATE_KEY=your_private_key
-```
+---
 
-Deploy:
+### Option 2: zkSync Local Node (Advanced)
+
+**Terminal 1** — Start zkSync node:
 ```bash
-source .env
-forge script script/DeploySimpleStorage.s.sol --rpc-url $SEPOLIA_RPC_URL --private-key $PRIVATE_KEY --broadcast --verify --etherscan-api-key $ETHERSCAN_API_KEY
+cd foundry-fund-me
+make zkbuild
+npx zksync-cli dev start
+```
+
+**Terminal 2** — Deploy to zkSync:
+```bash
+make deploy-zk
+```
+
+Copy the deployed contract address from the output.
+
+---
+
+## Configuration
+
+### Update Contract Address
+
+Open `constants.js` and update the `contractAddress` variable:
+
+```javascript
+export const contractAddress = "0x..." // Your deployed contract address
 ```
 
 ---
 
-## Interacting with Contract
+## Connect MetaMask
 
-### Using Cast (CLI)
+### ⚠️ Security Warning
 
-Store a number:
-```bash
-cast send <CONTRACT_ADDRESS> "store(uint256)" 42 --rpc-url <RPC_URL> --private-key <PRIVATE_KEY>
-```
+**NEVER use a MetaMask account with real funds for development/testing.**
 
-Retrieve the number:
-```bash
-cast call <CONTRACT_ADDRESS> "retrieve()" --rpc-url <RPC_URL>
-```
+Use a separate browser profile or dedicated development account.
 
-Convert hex output to decimal:
-```bash
-cast --to-base <HEX_OUTPUT> dec
-```
+---
+
+### For Local Anvil
+
+1. **Add Local Network to MetaMask:**
+   - Network Name: `Localhost 8545`
+   - RPC URL: `http://127.0.0.1:8545`
+   - Chain ID: `31337`
+   - Currency Symbol: `ETH`
+
+2. **Import Test Account:**
+   - Copy one of the private keys from Anvil output
+   - MetaMask → Import Account → Paste private key
+
+---
+
+### For zkSync Local Node
+
+1. **Add zkSync Local Network:**
+   - Network Name: `zkSync Local`
+   - RPC URL: `http://127.0.0.1:8011`
+   - Chain ID: `260`
+   - Currency Symbol: `ETH`
+
+2. **Import zkSync Test Account:**
+   - Use the `DEFAULT_ZKSYNC_LOCAL_KEY` from the `Makefile`
+   - MetaMask → Import Account → Paste private key
+
+---
+
+## Usage
+
+1. **Connect Wallet**
+   - Click "Connect" button
+   - Approve MetaMask connection
+
+2. **Fund the Contract**
+   - Enter amount in ETH (e.g., `0.1`)
+   - Click "Fund" button
+   - Confirm transaction in MetaMask
+
+3. **Withdraw Funds** (Owner only)
+   - Click "Withdraw" button
+   - Confirm transaction in MetaMask
+
+4. **Check Balance**
+   - Click "Get Balance" button
+   - View contract balance in console/UI
 
 ---
 
 ## Project Structure
 
 ```
-foundry-simple-storage/
-├── src/
-│   └── SimpleStorage.sol       # Main contract
-├── script/
-│   └── DeploySimpleStorage.s.sol  # Deployment script
-├── test/
-│   └── SimpleStorage.t.sol     # Contract tests
-├── foundry.toml                # Foundry configuration
+html-fund-me/
+├── index.html          # Main HTML page
+├── index.js            # Frontend logic & contract interaction
+├── constants.js        # Contract address & ABI
 └── README.md
 ```
 
@@ -139,28 +194,53 @@ foundry-simple-storage/
 ## Learning Outcomes
 
 This project teaches:
-- ✅ Foundry project setup and structure
-- ✅ Basic Solidity contract development
-- ✅ State variables and functions
-- ✅ Contract compilation with `forge build`
-- ✅ Local deployment with Anvil
-- ✅ Testnet deployment and verification
-- ✅ Contract interaction using Cast CLI
-- ✅ Transaction broadcasting and management
+- ✅ MetaMask wallet integration
+- ✅ Web3 provider setup with ethers.js
+- ✅ Signer creation and transaction signing
+- ✅ Smart contract interaction from frontend
+- ✅ Function selector understanding
+- ✅ Transaction broadcasting and confirmation
+- ✅ Local blockchain testing workflow
+- ✅ Frontend security considerations
 
 ---
 
 ## Security Considerations
 
-- Never commit private keys or `.env` files
-- Use separate wallets for development and production
-- Always verify contracts on Etherscan after deployment
-- Test thoroughly on local/testnet before mainnet
+**For Users:**
+- Always verify contract addresses
+- Never trust the frontend blindly
+- Check contract source code on Etherscan
+- Understand what transactions you're signing
+
+**For Developers:**
+- Frontend is NOT a trust layer
+- Contracts must handle all security logic
+- Never store private keys in frontend code
+- Always use environment-specific wallets
+
+---
+
+## Common Issues
+
+### MetaMask not connecting?
+- Check if MetaMask is unlocked
+- Verify correct network is selected
+- Refresh the page
+
+### Transaction failing?
+- Ensure contract is deployed
+- Verify `contractAddress` in `constants.js`
+- Check wallet has sufficient ETH for gas
+
+### Wrong network?
+- MetaMask → Switch to correct network (Localhost 8545 or zkSync Local)
 
 ---
 
 ## Resources
 
-- [Foundry Book](https://book.getfoundry.sh/)
 - [Cyfrin Updraft - Foundry Fundamentals](https://updraft.cyfrin.io/courses/foundry)
-- [Solidity Documentation](https://docs.soliditylang.org/)
+- [MetaMask Documentation](https://docs.metamask.io/)
+- [ethers.js Documentation](https://docs.ethers.org/)
+- [Foundry Book](https://book.getfoundry.sh/)
