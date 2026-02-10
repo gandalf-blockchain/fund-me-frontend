@@ -5,6 +5,12 @@ This project demonstrates the complete flow from wallet connection to contract i
 
 ---
 
+<p align="center">
+  <img src="assets/ui-preview.png" alt="Fund Me Frontend UI" width="360"/>
+</p>
+
+---
+
 ## About
 
 This is a learning project built as part of the [Cyfrin Updraft](https://updraft.cyfrin.io/) Foundry Fundamentals course.
